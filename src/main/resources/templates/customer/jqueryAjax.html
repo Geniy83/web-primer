@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Список заказчиков</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+</head>
+
+<script type="text/javascript">
+
+    function showCustomer() {
+        $.get('http://localhost:8080/customer', function (data) {
+            console.log(data);
+
+            let table ="<table border='1'><tr><th>First name</th><th>Last name</th><th>Email</th><th>Phone</th></tr>";
+
+            for (i = 0; i < data.length; i++) {
+                table = table +
+                    "</td><td>" + data[i].firstName +
+                    "</td><td>" + data[i].lastName +
+                    "</td><td>" + data[i].email +
+                    "</td><td>" + data[i].phone +
+                    "</td><td><button onclick='delete_customer("+ data[i].customerId +")'>Delete</button> " +
+                    "<button onclick='update_customer("+ data[i].customerId +")'>Update</button> </td></tr>";
+            }
+            table = table + "</table>"
+
+            $("#customer").html(table);
+        })
+    }
+
+    $(document).ready(function () {
+        showCustomer();
+    });
+
+    function send_customer() {
+
+        let dynamicURL = "";
+        let methodName = "";
+        let customerId = $("#customerId").val();
+
+        if (customerId) {
+            dynamicURL = 'http://localhost:8080/customer/' + customerId;
+            methodName = 'PUT';
+        } else {
+            dynamicURL = 'http://localhost:8080/customer';
+            methodName = 'POST';
+        }
+
+        $.ajax({
+            url: dynamicURL,
+            dataType: 'json',
+            type: methodName,
+            cache: false,
+            contentType: 'application/json',
+            data: JSON.stringify({
+                customerId: customerId,
+                firstName: $("#firstName").val(),
+                lastName: $("#lastName").val(),
+                email: $("#email").val(),
+                phone: $("#phone").val(),
+            }),
+            success: function () {
+                showCustomer();
+                reset();
+            }
+        })
+    }
+
+    function reset() {
+        $("#customerId").val('');
+        $("#firstName").val('');
+        $("#lastName").val('');
+        $("#email").val('');
+        $("#phone").val('');
+    }
+
+
+
+</script>
+<body>
+<h2>Список всех заказчиков</h2><br>
+<div id="customer">
+</div><br>
+
+<h5>Добавление заказчика</h5><br>
+<input type="text" id="customerId" placeholder="customer id"/><br/>
+<input type="text" id="firstName" placeholder="first name"/><br/>
+<input type="text" id="lastName" placeholder="last name"/><br/>
+<input type="text" id="email" placeholder="email"/><br/>
+<input type="text" id="phone" placeholder="phone"/><br/>
+<input type="button" onclick="send_customer()" value="Save"/>
+
+</body>
+</html>
